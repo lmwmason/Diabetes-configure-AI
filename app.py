@@ -1,31 +1,34 @@
-import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import numpy as np
+from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
 CORS(app)
-def load_model():
-    return "모델이 로드됨"
 
-model = load_model()
+model = load_model("diabetes_model.h5")
 
-@app.route("/")
-def index():
-    return "Hello from Flask on Render!"
+min_vals = np.array([0, 0, 0, 0, 0, 0.0, 0.078, 21])
+max_vals = np.array([17, 199, 122, 99, 846, 67.1, 2.42, 81])
 
-@app.route("/predict", methods=["POST"])
+def manual_scale(input_data):
+    input_array = np.array(input_data).reshape(1, -1)
+    return (input_array - min_vals) / (max_vals - min_vals)
+
+@app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        data = request.json
-        input_data = data.get("input")
+    data = request.get_json()
+    inputs = data.get('inputs')
+    if inputs is None or len(inputs) != 8:
+        return jsonify({'error': '8개의 입력값이 필요합니다.'}), 400
+    scaled_input = manual_scale(inputs)
+    prob = float(model.predict(scaled_input)[0][0])
+    return jsonify({
+        'probability': prob,
+        'prediction': '당뇨병' if prob > 0.5 else '비당뇨병'
+    })
 
-        prediction = "예측결과 예시"
-
-        return jsonify({"prediction": prediction, "status": "success"})
-
-    except Exception as e:
-        return jsonify({"error": str(e), "status": "fail"}), 400
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    import os
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
