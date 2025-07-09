@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>당뇨병 예측기</title>
+  <link rel="icon" type="image/png" href="https://cdn0.iconfinder.com/data/icons/coronavirus-104/512/diabetes_tester_sugar_blood_medical-1024.png">
+
+
   <style>
     body { max-width: 500px; margin: 2rem auto; font-family: Arial, sans-serif; }
     label { display: block; margin-top: 1rem; }
@@ -13,7 +16,7 @@
 </head>
 <body>
 
-  <h1>당뇨병 예측기</h1>
+  <h1>당뇨병 예측기!!</h1>
 
   <form id="predictForm">
     <label>임신 횟수:
@@ -63,10 +66,10 @@
       resultDiv.textContent = '예측 중...';
 
       try {
-        const response = await fetch('http://127.0.0.1:5000/predict', {  // 절대경로로 변경
+        const response = await fetch('http://127.0.0.1:5000/predict', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({inputs})
+          body: JSON.stringify({inputs: inputs})
         });
 
         if (!response.ok) {
